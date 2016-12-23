@@ -7,10 +7,6 @@ import Data.List.NonEmpty
 import System.Environment
 
 import Brick
-import Brick.Widgets.List
-import Control.Lens
-import qualified Data.Attoparsec.Text.Lazy as ATL
-import qualified Data.Set as Set
 import qualified Data.Text.Lazy.IO as TL
 import qualified Data.Vector as V
 import qualified GHC.Prof as Prof

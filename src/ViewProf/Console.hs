@@ -6,11 +6,12 @@
 {-# LANGUAGE TypeOperators #-}
 module ViewProf.Console where
 import Control.Arrow ((&&&))
+import Data.Function (on)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Maybe
 import qualified Data.List.NonEmpty as NE
 
-import Brick
+import Brick hiding (on)
 import Control.Lens
 import Data.Set (Set)
 import GHC.Prof hiding (Profile)
@@ -18,6 +19,7 @@ import Graphics.Vty
 import qualified Data.Scientific as Sci
 import qualified Data.Set as Set
 import qualified Data.Vector as V
+import qualified Data.Vector.Algorithms.Merge as Merge
 import qualified GHC.Prof as Prof
 
 data Profile n = Profile
@@ -56,14 +58,27 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       | key `elem` [KChar 'x'] -> continue $! popView prof
     _ -> case NE.head _profileViewStates of
       AggregatesView {} -> case vtyEv of
-        EvKey (KChar 't') [] -> continue $! orderByTime prof
-        EvKey (KChar 'a') [] -> continue $! orderByAlloc prof
+        EvKey (KChar 't') [] ->
+          continue $! sortCostCentresBy
+            (Prof.aggregateCostCentreTime &&& Prof.aggregateCostCentreAlloc)
+            prof
+        EvKey (KChar 'a') [] ->
+          continue $! sortCostCentresBy
+            (Prof.aggregateCostCentreAlloc &&& Prof.aggregateCostCentreTime)
+            prof
         EvKey key []
           | key `elem` [KUp, KChar 'k'] -> continue $! moveUp prof
           | key `elem` [KDown, KChar 'j'] -> continue $! moveDown prof
           | key `elem` [KEnter] -> continue $! viewCallers prof
         _ -> continue prof
-      CallSitesView {} -> continue prof
+      CallSitesView {} -> case vtyEv of
+        EvKey (KChar 't') [] -> continue $! sortCallSitesBy
+          (Prof.callSiteContribTime &&& Prof.callSiteContribAlloc)
+          prof
+        EvKey (KChar 'a') [] -> continue $! sortCallSitesBy
+          (Prof.callSiteContribAlloc &&& Prof.callSiteContribTime)
+          prof
+        _ -> continue prof
   _ -> continue prof
   where
     topView :: Traversal' (Profile n) ViewState
@@ -75,16 +90,10 @@ handleProfileEvent prof@Profile {..} ev = case ev of
     moveDown p = p & topView . viewFocus %~ (\i -> min (len - 1) (i + 1))
       where
         len = V.length (p ^. topView . viewModel)
-    orderByTime p = p & topView . viewModel .~
-      (p ^. profileReport
-        . to (Prof.aggregateCostCentresOrderBy
-          (Prof.aggregateCostCentreTime &&& Prof.aggregateCostCentreAlloc))
-        . to V.fromList)
-    orderByAlloc p = p & topView . viewModel .~
-      (p ^. profileReport
-        . to (Prof.aggregateCostCentresOrderBy
-          (Prof.aggregateCostCentreAlloc &&& Prof.aggregateCostCentreTime))
-        . to V.fromList)
+    sortCostCentresBy key p = p & topView . viewModel
+      %~ V.modify (Merge.sortBy (flip compare `on` key))
+    sortCallSitesBy key p = p & topView . viewCallSites
+      %~ V.modify (Merge.sortBy (flip compare `on` key))
     viewCallers p = fromMaybe p $ do
       model <- p ^? topView . viewModel
       idx <- p ^? topView . viewFocus

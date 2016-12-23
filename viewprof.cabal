@@ -28,6 +28,7 @@ executable viewprof
     , scientific
     , text
     , vector
+    , vector-algorithms
     , vty
   hs-source-dirs: bin, src
   default-language: Haskell2010
