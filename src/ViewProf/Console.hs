@@ -155,6 +155,8 @@ drawCallSite AggregateCostCentre {..} CallSite {..} = hBox
     ]
   ]
   where
-    contribution part whole = Sci.formatScientific Sci.Fixed (Just 1) $
-      Sci.fromFloatDigits $
-        100 * (Sci.toRealFloat part / Sci.toRealFloat whole :: Double)
+    contribution part whole
+      | whole == 0 = "0.0"
+      | otherwise = Sci.formatScientific Sci.Fixed (Just 1) $
+        Sci.fromFloatDigits $
+          100 * (Sci.toRealFloat part / Sci.toRealFloat whole :: Double)
