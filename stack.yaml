@@ -3,6 +3,6 @@ packages:
 - .
 extra-deps:
 - brick-0.15.2
+- ghc-prof-1.2.0
 - text-zipper-0.9
 - vty-5.14
-- ghc-prof-1.1.0

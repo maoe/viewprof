@@ -23,7 +23,7 @@ executable viewprof
     , attoparsec
     , brick
     , containers
-    , ghc-prof >= 1.1.0
+    , ghc-prof >= 1.2.0
     , lens
     , scientific
     , text

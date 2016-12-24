@@ -38,7 +38,7 @@ data ViewState
     }
   | CallSitesView
     { _viewCallee :: Prof.AggregateCostCentre
-    , _viewCallSites :: !(V.Vector CallSite)
+    , _viewCallSites :: !(V.Vector (CallSite AggregateCostCentre))
     , _viewExpanded :: !(Set Int)
     }
 
@@ -98,7 +98,7 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       model <- p ^? topView . viewModel
       idx <- p ^? topView . viewFocus
       AggregateCostCentre {..} <- model V.!? idx
-      (callee, callers) <- Prof.callSites
+      (callee, callers) <- Prof.aggregateCallSites
         aggregateCostCentreName
         aggregateCostCentreModule
         (p ^. profileReport)
@@ -136,11 +136,14 @@ drawAggregateCostCentre Prof.AggregateCostCentre {..} = hBox
   , str (show aggregateCostCentreAlloc) <+> txt "%"
   ]
 
-drawCallSite :: Prof.AggregateCostCentre -> Prof.CallSite -> Widget n
+drawCallSite
+  :: Prof.AggregateCostCentre
+  -> Prof.CallSite Prof.AggregateCostCentre
+  -> Widget n
 drawCallSite AggregateCostCentre {..} CallSite {..} = hBox
-  [ txt $ costCentreModule callSiteCostCentre
+  [ txt $ Prof.aggregateCostCentreModule callSiteCostCentre
   , txt "."
-  , padRight Max $ txt $ costCentreName callSiteCostCentre
+  , padRight Max $ txt $ Prof.aggregateCostCentreName callSiteCostCentre
   , padRight (Pad 1) $ hBox
     [ str $ contribution callSiteContribTime aggregateCostCentreTime
     , txt "% ("
