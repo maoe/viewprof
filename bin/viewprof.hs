@@ -31,7 +31,7 @@ parseProfile path = do
         { _viewModel = V.fromList (Prof.aggregateCostCentres prof)
         , _viewFocus = 0
         } :| []
-      , _profileName = Viewport1
+      , _profileName = undefined
       }
 
 app :: App (Profile Name) e Name
@@ -40,7 +40,9 @@ app = App
   , appChooseCursor = neverShowCursor
   , appHandleEvent = handleProfileEvent
   , appStartEvent = return
-  , appAttrMap = const $ attrMap Vty.defAttr []
+  , appAttrMap = const $ attrMap Vty.defAttr
+    [ (selectedAttr, Vty.black `on` Vty.white)
+    ]
   }
 --
 -- drawProfile :: (Ord n, Show n) => Profile n -> Widget ()

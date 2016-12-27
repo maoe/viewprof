@@ -1,9 +1,9 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TemplateHaskell #-}
 module ViewProf.Console where
 import Control.Arrow ((&&&))
 import Data.Function (on)
@@ -39,6 +39,7 @@ data ViewState
   | CallSitesView
     { _viewCallee :: Prof.AggregateCostCentre
     , _viewCallSites :: !(V.Vector (CallSite AggregateCostCentre))
+    , _viewFocus :: !Int
     , _viewExpanded :: !(Set Int)
     }
 
@@ -46,8 +47,8 @@ makeLenses ''Profile
 makeLenses ''ViewState
 
 data Name
-  = Viewport1 -- ^ The scroll view
-  | Viewport2
+  = ViewportAggregates
+  | ViewportCallSites
   deriving (Eq, Ord, Show)
 
 handleProfileEvent :: Profile n -> BrickEvent n e -> EventM n (Next (Profile n))
@@ -56,6 +57,8 @@ handleProfileEvent prof@Profile {..} ev = case ev of
     EvKey key []
       | key `elem` [KEsc, KChar 'q'] -> halt prof
       | key `elem` [KChar 'x'] -> continue $! popView prof
+      | key `elem` [KUp, KChar 'k'] -> continue $! moveUp prof
+      | key `elem` [KDown, KChar 'j'] -> continue $! moveDown prof
     _ -> case NE.head _profileViewStates of
       AggregatesView {} -> case vtyEv of
         EvKey (KChar 't') [] ->
@@ -67,8 +70,6 @@ handleProfileEvent prof@Profile {..} ev = case ev of
             (Prof.aggregateCostCentreAlloc &&& Prof.aggregateCostCentreTime)
             prof
         EvKey key []
-          | key `elem` [KUp, KChar 'k'] -> continue $! moveUp prof
-          | key `elem` [KDown, KChar 'j'] -> continue $! moveDown prof
           | key `elem` [KEnter] -> continue $! viewCallers prof
         _ -> continue prof
       CallSitesView {} -> case vtyEv of
@@ -89,7 +90,9 @@ handleProfileEvent prof@Profile {..} ev = case ev of
     moveUp p = p & topView . viewFocus %~ (\i -> max 0 (i - 1))
     moveDown p = p & topView . viewFocus %~ (\i -> min (len - 1) (i + 1))
       where
-        len = V.length (p ^. topView . viewModel)
+        len = case NE.head _profileViewStates of
+          AggregatesView {_viewModel} -> V.length _viewModel
+          CallSitesView {_viewCallSites} -> V.length _viewCallSites
     sortCostCentresBy key p = p & topView . viewModel
       %~ V.modify (Merge.sortBy (flip compare `on` key))
     sortCallSitesBy key p = p & topView . viewCallSites
@@ -105,26 +108,35 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       return $! p & profileViewStates %~ NE.cons CallSitesView
         { _viewCallee = callee
         , _viewCallSites = V.fromList callers
+        , _viewFocus = 0
         , _viewExpanded = Set.empty
         }
 
 profileAttr :: AttrName
 profileAttr = "profile"
 
+selectedAttr :: AttrName
+selectedAttr = "selected"
+
 drawProfile :: Profile Name -> [Widget Name]
 drawProfile prof = do
   viewState <- NE.toList $ prof ^. profileViewStates
-  case viewState of
-    AggregatesView {..} ->
-      return $ viewport Viewport1 Vertical $ vBox $ V.toList $
-        flip V.imap _viewModel $ \i row -> hBox
-          [ txt $ if i == _viewFocus then "*" else " "
-          , drawAggregateCostCentre row
-          ]
-    CallSitesView {..} ->
-      return $ viewport Viewport2 Vertical $ vBox
+  return $ case viewState of
+    AggregatesView {..} -> viewport ViewportAggregates Vertical $
+      vBox $ V.toList $
+        flip V.imap _viewModel $ \i row ->
+          let widget = drawAggregateCostCentre row
+          in if i == _viewFocus
+            then withAttr selectedAttr (visible widget)
+            else widget
+    CallSitesView {..} -> viewport ViewportCallSites Vertical $
+      vBox
         [ drawAggregateCostCentre _viewCallee
-        , vBox $ V.toList $ V.map (drawCallSite _viewCallee) _viewCallSites
+        , vBox $ V.toList $ flip V.imap _viewCallSites $ \i row ->
+          let widget = drawCallSite _viewCallee row
+          in if i == _viewFocus
+            then withAttr selectedAttr (visible widget)
+            else widget
         ]
 
 drawAggregateCostCentre :: Prof.AggregateCostCentre -> Widget n
