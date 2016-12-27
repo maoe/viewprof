@@ -84,7 +84,7 @@ handleProfileEvent prof@Profile {..} ev = case ev of
   where
     topView :: Traversal' (Profile n) ViewState
     topView = profileViewStates . ix 0
-    popView p = case NE.nonEmpty (NE.tail (p ^. profileViewStates)) of
+    popView p = case NE.nonEmpty (NE.tail _profileViewStates) of
       Nothing -> p
       Just xs -> p & profileViewStates .~ xs
     moveUp p = p & topView . viewFocus %~ (\i -> max 0 (i - 1))
