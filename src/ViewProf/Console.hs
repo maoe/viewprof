@@ -37,7 +37,7 @@ data ViewState
     , _viewFocus :: !Int
     }
   | CallSitesView
-    { _viewCallee :: Prof.AggregateCostCentre
+    { _viewCallee :: !Prof.AggregateCostCentre
     , _viewCallSites :: !(V.Vector (CallSite AggregateCostCentre))
     , _viewFocus :: !Int
     , _viewExpanded :: !(Set Int)
