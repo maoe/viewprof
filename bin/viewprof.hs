@@ -44,22 +44,3 @@ app = App
     [ (selectedAttr, Vty.black `on` Vty.white)
     ]
   }
---
--- drawProfile :: (Ord n, Show n) => Profile n -> Widget ()
--- drawProfile = renderList drawCostCentre True . profileToList
---
--- drawCostCentre :: Bool -> Prof.AggregateCostCentre -> Widget n
--- drawCostCentre isSelected Prof.AggregateCostCentre {..} = hBox
---   [ txt $ if isSelected then "*" else " "
---   , txt aggregateCostCentreModule
---   , txt "."
---   , padRight Max $ txt aggregateCostCentreName
---   , padRight (Pad 1) $ str (show aggregateCostCentreTime)
---   , str (show aggregateCostCentreAlloc)
---   ]
---
--- profileToList :: Profile n -> List () Prof.AggregateCostCentre
--- profileToList prof = list
---   ()
---   (V.fromList (Prof.aggregateCostCentres (_profileReport prof)))
---   1
