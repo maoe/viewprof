@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE NamedFieldPuns #-}
@@ -82,15 +83,13 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         _ -> continue prof
   _ -> continue prof
   where
-    topView :: Traversal' (Profile n) ViewState
-    topView = profileViewStates . ix 0
     popView p = case NE.nonEmpty (NE.tail _profileViewStates) of
       Nothing -> p
       Just xs -> p & profileViewStates .~ xs
     moveUp p = p & topView . viewFocus %~ (\i -> max 0 (i - 1))
     moveDown p = p & topView . viewFocus %~ (\i -> min (len - 1) (i + 1))
       where
-        len = case NE.head _profileViewStates of
+        len = case p ^. topView of
           AggregatesView {_viewModel} -> V.length _viewModel
           CallSitesView {_viewCallSites} -> V.length _viewCallSites
     sortCostCentresBy key p = p & topView . viewModel
@@ -98,8 +97,8 @@ handleProfileEvent prof@Profile {..} ev = case ev of
     sortCallSitesBy key p = p & topView . viewCallSites
       %~ V.modify (Merge.sortBy (flip compare `on` key))
     viewCallers p = fromMaybe p $ do
-      model <- p ^? topView . viewModel
-      idx <- p ^? topView . viewFocus
+      let !model = p ^. topView . viewModel
+          !idx = p ^. topView . viewFocus
       AggregateCostCentre {..} <- model V.!? idx
       (callee, callers) <- Prof.aggregateCallSites
         aggregateCostCentreName
@@ -111,6 +110,10 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         , _viewFocus = 0
         , _viewExpanded = Set.empty
         }
+
+topView :: Lens' (Profile n) ViewState
+topView = profileViewStates . lens NE.head (\(_ NE.:| xs) x -> x NE.:| xs)
+{-# INLINE topView #-}
 
 profileAttr :: AttrName
 profileAttr = "profile"
