@@ -7,6 +7,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module ViewProf.Console where
 import Control.Arrow ((&&&))
+import Data.Foldable
 import Data.Function (on)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Maybe
@@ -50,36 +51,54 @@ makeLenses ''ViewState
 data Name
   = ViewportAggregates
   | ViewportCallSites
+  | AggregatesCache !Int
+  | CallSitesCache !Int
   deriving (Eq, Ord, Show)
 
-handleProfileEvent :: Profile n -> BrickEvent n e -> EventM n (Next (Profile n))
+handleProfileEvent :: Profile Name -> BrickEvent Name e -> EventM Name (Next (Profile Name))
 handleProfileEvent prof@Profile {..} ev = case ev of
   VtyEvent vtyEv -> case vtyEv of
     EvKey key []
       | key `elem` [KEsc, KChar 'q'] -> halt prof
-      | key `elem` [KChar 'x'] -> continue $! popView prof
-      | key `elem` [KUp, KChar 'k'] -> continue $! moveUp prof
-      | key `elem` [KDown, KChar 'j'] -> continue $! moveDown prof
+      | key `elem` [KChar 'x'] -> do
+        invalidateCache
+        continue $! popView prof
+      | key `elem` [KUp, KChar 'k'] -> do
+        let !pos = prof ^. currentFocus
+        for_ [pos, pos-1] $ invalidateCacheEntry . currentCacheEntry prof
+        continue $! moveUp prof
+      | key `elem` [KDown, KChar 'j'] -> do
+        let !pos = prof ^. currentFocus
+        for_ [pos, pos+1] $ invalidateCacheEntry . currentCacheEntry prof
+        continue $! moveDown prof
     _ -> case NE.head _profileViewStates of
       AggregatesView {} -> case vtyEv of
-        EvKey (KChar 't') [] ->
+        EvKey (KChar 't') [] -> do
+          invalidateCache
           continue $! sortCostCentresBy
             (Prof.aggregateCostCentreTime &&& Prof.aggregateCostCentreAlloc)
             prof
-        EvKey (KChar 'a') [] ->
+        EvKey (KChar 'a') [] -> do
+          invalidateCache
           continue $! sortCostCentresBy
             (Prof.aggregateCostCentreAlloc &&& Prof.aggregateCostCentreTime)
             prof
         EvKey key []
-          | key `elem` [KEnter] -> continue $! viewCallers prof
+          | key `elem` [KEnter] -> do
+            invalidateCache
+            continue $! viewCallers prof
         _ -> continue prof
       CallSitesView {} -> case vtyEv of
-        EvKey (KChar 't') [] -> continue $! sortCallSitesBy
-          (Prof.callSiteContribTime &&& Prof.callSiteContribAlloc)
-          prof
-        EvKey (KChar 'a') [] -> continue $! sortCallSitesBy
-          (Prof.callSiteContribAlloc &&& Prof.callSiteContribTime)
-          prof
+        EvKey (KChar 't') [] -> do
+          invalidateCache
+          continue $! sortCallSitesBy
+            (Prof.callSiteContribTime &&& Prof.callSiteContribAlloc)
+            prof
+        EvKey (KChar 'a') [] -> do
+          invalidateCache
+          continue $! sortCallSitesBy
+            (Prof.callSiteContribAlloc &&& Prof.callSiteContribTime)
+            prof
         _ -> continue prof
   _ -> continue prof
   where
@@ -115,6 +134,15 @@ topView :: Lens' (Profile n) ViewState
 topView = profileViewStates . lens NE.head (\(_ NE.:| xs) x -> x NE.:| xs)
 {-# INLINE topView #-}
 
+currentFocus :: Lens' (Profile n) Int
+currentFocus = topView . viewFocus
+{-# INLINE currentFocus #-}
+
+currentCacheEntry :: Profile n -> Int -> Name
+currentCacheEntry p n = case p ^. topView of
+  AggregatesView {} -> AggregatesCache n
+  CallSitesView {} -> CallSitesCache n
+
 profileAttr :: AttrName
 profileAttr = "profile"
 
@@ -127,7 +155,7 @@ drawProfile prof = do
   return $ case viewState of
     AggregatesView {..} -> viewport ViewportAggregates Vertical $
       vBox $ V.toList $
-        flip V.imap _viewModel $ \i row ->
+        flip V.imap _viewModel $ \i row -> cached (AggregatesCache i) $
           let widget = drawAggregateCostCentre row
           in if i == _viewFocus
             then withAttr selectedAttr (visible widget)
@@ -136,10 +164,11 @@ drawProfile prof = do
       vBox
         [ drawAggregateCostCentre _viewCallee
         , vBox $ V.toList $ flip V.imap _viewCallSites $ \i row ->
-          let widget = drawCallSite _viewCallee row
-          in if i == _viewFocus
-            then withAttr selectedAttr (visible widget)
-            else widget
+          cached (CallSitesCache i) $
+            let widget = drawCallSite _viewCallee row
+            in if i == _viewFocus
+              then withAttr selectedAttr (visible widget)
+              else widget
         ]
 
 drawAggregateCostCentre :: Prof.AggregateCostCentre -> Widget n
