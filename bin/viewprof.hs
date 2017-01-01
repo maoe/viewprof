@@ -26,10 +26,10 @@ parseProfile path = do
   case Prof.decode text of
     Left reason -> fail reason
     Right prof -> return Profile
-      { _profileReport = prof
-      , _profileViewStates = AggregatesView
-        { _viewModel = V.fromList (Prof.aggregateCostCentres prof)
-        , _viewFocus = 0
+      { _report = prof
+      , _views = AggregatesView
+        { _costCentres = V.fromList (Prof.aggregateCostCentres prof)
+        , _focus = 0
         } :| []
       }
 
