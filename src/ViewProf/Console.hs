@@ -48,9 +48,9 @@ makeLenses ''Profile
 makeLenses ''View
 
 data Name
-  = ViewportAggregates
-  | ViewportCallSites
-  | ViewportModules
+  = AggregatesViewport
+  | CallSitesViewport
+  | ModulesViewport
   | AggregatesCache !Int
   | CallSitesCache !Int
   | ModulesCache !Int
@@ -171,14 +171,14 @@ drawProfile :: Profile -> [Widget Name]
 drawProfile prof = do
   viewState <- NE.toList $ prof ^. views
   return $ case viewState of
-    AggregatesView {..} -> viewport ViewportAggregates Vertical $
+    AggregatesView {..} -> viewport AggregatesViewport Vertical $
       vBox $ V.toList $
         flip V.imap _costCentres $ \i row -> cached (AggregatesCache i) $
           let widget = drawAggregateCostCentre row
           in if i == _focus
             then withAttr selectedAttr (visible widget)
             else widget
-    CallSitesView {..} -> viewport ViewportCallSites Vertical $
+    CallSitesView {..} -> viewport CallSitesViewport Vertical $
       vBox
         [ drawAggregateCostCentre _callee
         , vBox $ V.toList $ flip V.imap _callSites $ \i row ->
@@ -188,7 +188,7 @@ drawProfile prof = do
               then withAttr selectedAttr (visible widget)
               else widget
         ]
-    ModulesView {..} -> viewport ViewportModules Vertical $
+    ModulesView {..} -> viewport ModulesViewport Vertical $
       vBox $ V.toList $
         flip V.imap _modules $ \i row -> cached (ModulesCache i) $
           let widget = drawAggregateModule row
