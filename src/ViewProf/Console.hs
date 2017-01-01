@@ -113,8 +113,8 @@ handleProfileEvent prof@Profile {..} ev = case ev of
     popView p = case NE.nonEmpty (NE.tail _views) of
       Nothing -> p
       Just xs -> p & views .~ xs
-    moveUp p = p & topView . focus %~ (\i -> max 0 (i - 1))
-    moveDown p = p & topView . focus %~ (\i -> min (len - 1) (i + 1))
+    moveUp p = p & currentFocus %~ (\i -> max 0 (i - 1))
+    moveDown p = p & currentFocus %~ (\i -> min (len - 1) (i + 1))
       where
         len = case p ^. topView of
           AggregatesView {_costCentres} -> V.length _costCentres
@@ -130,7 +130,7 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       } NE.:| []
     displayCallers p = fromMaybe p $ do
       let !model = p ^. topView . costCentres
-          !idx = p ^. topView . focus
+          !idx = p ^. currentFocus
       Prof.AggregateCostCentre {..} <- model V.!? idx
       (_callee, callers) <- Prof.aggregateCallSites
         aggregateCostCentreName
