@@ -24,14 +24,10 @@ import qualified Data.Vector as V
 import qualified Data.Vector.Algorithms.Merge as Merge
 import qualified GHC.Prof as Prof
 
-data Profile n = Profile
+data Profile = Profile
   { _profileReport :: Prof.Profile
   , _profileViewStates :: NonEmpty ViewState
-  , _profileName :: n
   }
-
-instance Named (Profile n) n where
-  getName = _profileName
 
 data ViewState
   = AggregatesView
@@ -61,7 +57,7 @@ data Name
   | ModulesCache !Int
   deriving (Eq, Ord, Show)
 
-handleProfileEvent :: Profile Name -> BrickEvent Name e -> EventM Name (Next (Profile Name))
+handleProfileEvent :: Profile -> BrickEvent Name e -> EventM Name (Next Profile)
 handleProfileEvent prof@Profile {..} ev = case ev of
   VtyEvent vtyEv -> case vtyEv of
     EvKey key []
@@ -152,15 +148,15 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       , _viewFocus = 0
       } NE.:| []
 
-topView :: Lens' (Profile n) ViewState
+topView :: Lens' Profile ViewState
 topView = profileViewStates . lens NE.head (\(_ NE.:| xs) x -> x NE.:| xs)
 {-# INLINE topView #-}
 
-currentFocus :: Lens' (Profile n) Int
+currentFocus :: Lens' Profile Int
 currentFocus = topView . viewFocus
 {-# INLINE currentFocus #-}
 
-currentCacheEntry :: Profile n -> Int -> Name
+currentCacheEntry :: Profile -> Int -> Name
 currentCacheEntry p n = case p ^. topView of
   AggregatesView {} -> AggregatesCache n
   CallSitesView {} -> CallSitesCache n
@@ -172,7 +168,7 @@ profileAttr = "profile"
 selectedAttr :: AttrName
 selectedAttr = "selected"
 
-drawProfile :: Profile Name -> [Widget Name]
+drawProfile :: Profile -> [Widget Name]
 drawProfile prof = do
   viewState <- NE.toList $ prof ^. profileViewStates
   return $ case viewState of

@@ -20,7 +20,7 @@ main = do
   profile <- parseProfile path
   void $ defaultMain app profile
 
-parseProfile :: FilePath -> IO (Profile Name)
+parseProfile :: FilePath -> IO Profile
 parseProfile path = do
   text <- TL.readFile path
   case Prof.decode text of
@@ -31,10 +31,9 @@ parseProfile path = do
         { _viewModel = V.fromList (Prof.aggregateCostCentres prof)
         , _viewFocus = 0
         } :| []
-      , _profileName = undefined
       }
 
-app :: App (Profile Name) e Name
+app :: App Profile e Name
 app = App
   { appDraw = drawProfile
   , appChooseCursor = neverShowCursor
