@@ -11,6 +11,7 @@ import Data.Foldable
 import Data.Function (on)
 import Data.List.NonEmpty (NonEmpty)
 import Data.Maybe
+import Text.Printf
 import qualified Data.List.NonEmpty as NE
 
 import Brick hiding (on)
@@ -201,8 +202,8 @@ drawAggregateCostCentre Prof.AggregateCostCentre {..} = hBox
   [ txt aggregateCostCentreModule
   , txt "."
   , padRight Max $ txt aggregateCostCentreName
-  , padRight (Pad 1) $ str (show aggregateCostCentreTime) <+> txt "%"
-  , str (show aggregateCostCentreAlloc) <+> txt "%"
+  , padRight (Pad 1) $ str (formatPercentage aggregateCostCentreTime)
+  , str (formatPercentage aggregateCostCentreAlloc)
   ]
 
 drawCallSite
@@ -215,27 +216,29 @@ drawCallSite Prof.AggregateCostCentre {..} Prof.CallSite {..} = hBox
   , padRight Max $ txt $ Prof.aggregateCostCentreName callSiteCostCentre
   , padRight (Pad 1) $ hBox
     [ str $ contribution callSiteContribTime aggregateCostCentreTime
-    , txt "% ("
-    , str $ show callSiteContribTime
-    , txt "%)"
+    , txt " ("
+    , str $ formatPercentage callSiteContribTime
+    , txt ")"
     ]
   , hBox
     [ str $ contribution callSiteContribAlloc aggregateCostCentreAlloc
-    , txt "% ("
-    , str $ show callSiteContribAlloc
-    , txt "%)"
+    , txt " ("
+    , str $ formatPercentage callSiteContribAlloc
+    , txt ")"
     ]
   ]
   where
     contribution part whole
-      | whole == 0 = "0.0"
-      | otherwise = Sci.formatScientific Sci.Fixed (Just 1) $
-        Sci.fromFloatDigits $
-          100 * (Sci.toRealFloat part / Sci.toRealFloat whole :: Double)
+      | whole == 0 = formatPercentage 0
+      | otherwise = formatPercentage $ Sci.fromFloatDigits $
+        100 * (Sci.toRealFloat part / Sci.toRealFloat whole :: Double)
 
 drawAggregateModule :: Prof.AggregateModule -> Widget n
 drawAggregateModule Prof.AggregateModule {..} = hBox
   [ txt aggregateModuleName
-  , padLeft Max $ str (show aggregateModuleTime) <+> txt "%"
-  , padLeft (Pad 1) $ str (show aggregateModuleAlloc) <+> txt "%"
+  , padLeft Max $ str (formatPercentage aggregateModuleTime)
+  , padLeft (Pad 1) $ str (formatPercentage aggregateModuleAlloc)
   ]
+
+formatPercentage :: Sci.Scientific -> String
+formatPercentage = printf "%5s%%" . Sci.formatScientific Sci.Fixed (Just 1)
