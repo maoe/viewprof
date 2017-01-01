@@ -44,6 +44,10 @@ data ViewState
     , _viewFocus :: !Int
     , _viewExpanded :: !(Set Int)
     }
+  | ModulesView
+    { _viewModules :: !(V.Vector Prof.AggregateModule)
+    , _viewFocus :: !Int
+    }
 
 makeLenses ''Profile
 makeLenses ''ViewState
@@ -51,8 +55,10 @@ makeLenses ''ViewState
 data Name
   = ViewportAggregates
   | ViewportCallSites
+  | ViewportModules
   | AggregatesCache !Int
   | CallSitesCache !Int
+  | ModulesCache !Int
   deriving (Eq, Ord, Show)
 
 handleProfileEvent :: Profile Name -> BrickEvent Name e -> EventM Name (Next (Profile Name))
@@ -71,6 +77,12 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         let !pos = prof ^. currentFocus
         for_ [pos, pos+1] $ invalidateCacheEntry . currentCacheEntry prof
         continue $! moveDown prof
+      | key `elem` [KChar 'C'] -> do
+        invalidateCache
+        continue $! displayCostCentres prof
+      | key `elem` [KChar 'M'] -> do
+        invalidateCache
+        continue $! displayModules prof
     _ -> case NE.head _profileViewStates of
       AggregatesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
@@ -86,7 +98,7 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         EvKey key []
           | key `elem` [KEnter] -> do
             invalidateCache
-            continue $! viewCallers prof
+            continue $! displayCallers prof
         _ -> continue prof
       CallSitesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
@@ -100,6 +112,7 @@ handleProfileEvent prof@Profile {..} ev = case ev of
             (Prof.callSiteContribAlloc &&& Prof.callSiteContribTime)
             prof
         _ -> continue prof
+      ModulesView {} -> continue prof
   _ -> continue prof
   where
     popView p = case NE.nonEmpty (NE.tail _profileViewStates) of
@@ -111,11 +124,16 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         len = case p ^. topView of
           AggregatesView {_viewModel} -> V.length _viewModel
           CallSitesView {_viewCallSites} -> V.length _viewCallSites
+          ModulesView {_viewModules} -> V.length _viewModules
     sortCostCentresBy key p = p & topView . viewModel
       %~ V.modify (Merge.sortBy (flip compare `on` key))
     sortCallSitesBy key p = p & topView . viewCallSites
       %~ V.modify (Merge.sortBy (flip compare `on` key))
-    viewCallers p = fromMaybe p $ do
+    displayCostCentres p = p & profileViewStates .~ AggregatesView
+      { _viewModel = V.fromList $ Prof.aggregateCostCentres $ p ^. profileReport
+      , _viewFocus = 0
+      } NE.:| []
+    displayCallers p = fromMaybe p $ do
       let !model = p ^. topView . viewModel
           !idx = p ^. topView . viewFocus
       AggregateCostCentre {..} <- model V.!? idx
@@ -129,6 +147,10 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         , _viewFocus = 0
         , _viewExpanded = Set.empty
         }
+    displayModules p = p & profileViewStates .~ ModulesView
+      { _viewModules = V.fromList $ Prof.aggregateModules $ p ^. profileReport
+      , _viewFocus = 0
+      } NE.:| []
 
 topView :: Lens' (Profile n) ViewState
 topView = profileViewStates . lens NE.head (\(_ NE.:| xs) x -> x NE.:| xs)
@@ -142,6 +164,7 @@ currentCacheEntry :: Profile n -> Int -> Name
 currentCacheEntry p n = case p ^. topView of
   AggregatesView {} -> AggregatesCache n
   CallSitesView {} -> CallSitesCache n
+  ModulesView {} -> ModulesCache n
 
 profileAttr :: AttrName
 profileAttr = "profile"
@@ -170,6 +193,13 @@ drawProfile prof = do
               then withAttr selectedAttr (visible widget)
               else widget
         ]
+    ModulesView {..} -> viewport ViewportModules Vertical $
+      vBox $ V.toList $
+        flip V.imap _viewModules $ \i row -> cached (ModulesCache i) $
+          let widget = drawAggregateModule row
+          in if i == _viewFocus
+            then withAttr selectedAttr (visible widget)
+            else widget
 
 drawAggregateCostCentre :: Prof.AggregateCostCentre -> Widget n
 drawAggregateCostCentre Prof.AggregateCostCentre {..} = hBox
@@ -207,3 +237,10 @@ drawCallSite AggregateCostCentre {..} CallSite {..} = hBox
       | otherwise = Sci.formatScientific Sci.Fixed (Just 1) $
         Sci.fromFloatDigits $
           100 * (Sci.toRealFloat part / Sci.toRealFloat whole :: Double)
+
+drawAggregateModule :: Prof.AggregateModule -> Widget n
+drawAggregateModule Prof.AggregateModule {..} = hBox
+  [ txt aggregateModuleName
+  , padLeft Max $ str (show aggregateModuleTime) <+> txt "%"
+  , padLeft (Pad 1) $ str (show aggregateModuleAlloc) <+> txt "%"
+  ]
