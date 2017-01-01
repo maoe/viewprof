@@ -2,10 +2,10 @@ resolver: lts-7.13
 packages:
 - .
 - location:
-    git: https://github.com/maoe/brick.git
-    commit: 51ec87ad11036a15e03063ec07296ee59f6ec04a
+    git: git@github.com:jtdaugherty/brick.git
+    commit: "764610f"
   extra-dep: true
 extra-deps:
-- ghc-prof-1.2.0
+- ghc-prof-1.3.0
 - text-zipper-0.9
 - vty-5.14
