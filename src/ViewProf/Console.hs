@@ -61,10 +61,11 @@ handleProfileEvent :: Profile -> BrickEvent Name e -> EventM Name (Next Profile)
 handleProfileEvent prof@Profile {..} ev = case ev of
   VtyEvent vtyEv -> case vtyEv of
     EvKey key []
-      | key `elem` [KEsc, KChar 'q'] -> halt prof
-      | key `elem` [KChar 'x'] -> do
-        invalidateCache
-        continue $! popView prof
+      | key `elem` [KEsc, KChar 'q'] -> if null (NE.tail (prof ^. views))
+        then halt prof
+        else do
+          invalidateCache
+          continue $! popView prof
       | key `elem` [KUp, KChar 'k'] -> do
         let !pos = prof ^. currentFocus
         for_ [pos, pos-1] $ invalidateCacheEntry . currentCacheEntry prof
