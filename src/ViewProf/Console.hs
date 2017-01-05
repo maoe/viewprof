@@ -95,6 +95,11 @@ handleProfileEvent prof@Profile {..} ev = case ev of
           continue $! sortCostCentresBy
             (Prof.aggregateCostCentreAlloc &&& Prof.aggregateCostCentreTime)
             prof
+        EvKey (KChar 'e') [] -> do
+          invalidateCache
+          continue $! sortCostCentresBy
+            Prof.aggregateCostCentreEntries
+            prof
         EvKey key []
           | key `elem` [KEnter] -> do
             invalidateCache
@@ -110,6 +115,11 @@ handleProfileEvent prof@Profile {..} ev = case ev of
           invalidateCache
           continue $! sortCallSitesBy
             (Prof.callSiteContribAlloc &&& Prof.callSiteContribTime)
+            prof
+        EvKey (KChar 'e') [] -> do
+          invalidateCache
+          continue $! sortCallSitesBy
+            Prof.callSiteContribEntries
             prof
         _ -> continue prof
       ModulesView {} -> continue prof
@@ -206,6 +216,7 @@ drawAggregateCostCentre Prof.AggregateCostCentre {..} = hBox
   [ txt aggregateCostCentreModule
   , txt "."
   , padRight Max $ txt aggregateCostCentreName
+  , maybe emptyWidget (padRight (Pad 1) . str . show) aggregateCostCentreEntries
   , padRight (Pad 1) $ str (formatPercentage aggregateCostCentreTime)
   , str (formatPercentage aggregateCostCentreAlloc)
   ]
@@ -218,6 +229,7 @@ drawCallSite Prof.AggregateCostCentre {..} Prof.CallSite {..} = hBox
   [ txt $ Prof.aggregateCostCentreModule callSiteCostCentre
   , txt "."
   , padRight Max $ txt $ Prof.aggregateCostCentreName callSiteCostCentre
+  , padRight (Pad 1) $ str $ show callSiteContribEntries
   , padRight (Pad 1) $ hBox
     [ str $ contribution callSiteContribTime aggregateCostCentreTime
     , txt " ("
