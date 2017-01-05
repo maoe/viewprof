@@ -60,6 +60,9 @@ data Name
 handleProfileEvent :: Profile -> BrickEvent Name e -> EventM Name (Next Profile)
 handleProfileEvent prof@Profile {..} ev = case ev of
   VtyEvent vtyEv -> case vtyEv of
+    EvResize {} -> do
+      invalidateCache
+      continue prof
     EvKey key []
       | key `elem` [KEsc, KChar 'q'] -> if null (NE.tail (prof ^. views))
         then halt prof
