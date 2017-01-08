@@ -15,8 +15,6 @@ tested-with: GHC == 8.0.1
 
 executable viewprof
   main-is: viewprof.hs
-  other-modules:
-    ViewProf.Console
   -- other-extensions:
   build-depends:
       base >= 4.9 && < 4.10
@@ -30,6 +28,6 @@ executable viewprof
     , vector
     , vector-algorithms
     , vty
-  hs-source-dirs: bin, src
+  hs-source-dirs: bin
   default-language: Haskell2010
   ghc-options: -Wall -threaded
