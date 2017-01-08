@@ -31,6 +31,7 @@ parseProfile path = do
         { _costCentres = V.fromList (Prof.aggregateCostCentres prof)
         , _focus = 0
         } :| []
+      , _lastKeyEvent = Nothing
       }
 
 app :: App Profile e Name

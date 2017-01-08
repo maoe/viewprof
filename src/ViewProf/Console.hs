@@ -27,6 +27,7 @@ import qualified GHC.Prof as Prof
 data Profile = Profile
   { _report :: Prof.Profile
   , _views :: NonEmpty View
+  , _lastKeyEvent :: !(Maybe (Key, [Modifier]))
   }
 
 data View
@@ -83,6 +84,16 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       | key `elem` [KChar 'M'] -> do
         invalidateCache
         continue $! displayModules prof
+      | key `elem` [KChar 'g'] ->
+        if prof ^. lastKeyEvent == Just (KChar 'g', [])
+          then do
+            invalidateCache
+            continue $! moveToTop $ prof & lastKeyEvent .~ Nothing
+          else
+            continue $! prof & lastKeyEvent .~ Just (key, [])
+      | key `elem` [KChar 'G'] -> do
+        invalidateCache
+        continue $! moveToEnd prof
     _ -> case NE.head _views of
       AggregatesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
@@ -129,12 +140,13 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       Nothing -> p
       Just xs -> p & views .~ xs
     moveUp p = p & currentFocus %~ (\i -> max 0 (i - 1))
-    moveDown p = p & currentFocus %~ (\i -> min (len - 1) (i + 1))
-      where
-        len = case p ^. topView of
-          AggregatesView {_costCentres} -> V.length _costCentres
-          CallSitesView {_callSites} -> V.length _callSites
-          ModulesView {_modules} -> V.length _modules
+    moveDown p = p & currentFocus %~ (\i -> min (focusLen p - 1) (i + 1))
+    moveToTop p = p & currentFocus .~ 0
+    moveToEnd p = p & currentFocus .~ focusLen p - 1
+    focusLen p = case p ^. topView of
+      AggregatesView {_costCentres} -> V.length _costCentres
+      CallSitesView {_callSites} -> V.length _callSites
+      ModulesView {_modules} -> V.length _modules
     sortCostCentresBy key p = p & topView . costCentres
       %~ V.modify (Merge.sortBy (flip compare `on` key))
     sortCallSitesBy key p = p & topView . callSites
@@ -169,6 +181,12 @@ topView = views . lens NE.head (\(_ NE.:| xs) x -> x NE.:| xs)
 currentFocus :: Lens' Profile Int
 currentFocus = topView . focus
 {-# INLINE currentFocus #-}
+
+currentViewport :: Profile -> Name
+currentViewport p = case p ^. topView of
+  AggregatesView {} -> AggregatesViewport
+  CallSitesView {} -> CallSitesViewport
+  ModulesView {} -> ModulesViewport
 
 currentCacheEntry :: Profile -> Int -> Name
 currentCacheEntry p n = case p ^. topView of
