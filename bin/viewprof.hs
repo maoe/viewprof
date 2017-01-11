@@ -57,6 +57,7 @@ data View
 
 data ModalView
   = InfoView
+  | HelpView
 
 makeLenses ''Profile
 makeLenses ''View
@@ -143,6 +144,8 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         continue $! moveToEnd prof
       | key `elem` [KChar 'i'] ->
         continue $! prof & modalView ?~ InfoView
+      | key `elem` [KChar 'h', KChar '?'] ->
+        continue $! prof & modalView ?~ HelpView
     _ -> case NE.head _views of
       AggregatesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
@@ -259,6 +262,22 @@ drawProfile prof =
       InfoView -> Brick.border $ vBox
         [ txt $ prof ^. report . to Prof.profileCommandLine
         -- TODO: add more
+        ]
+      HelpView -> Brick.borderWithLabel (txt "Help") $ vBox
+        [ txt "Keyboard shortcuts"
+        , txt "q       quit current view"
+        , txt "j,down  move down"
+        , txt "k,up    move up"
+        , txt "gg      move to the top"
+        , txt "G       move to the bottom"
+        , txt "C       switch to aggregate cost centre view"
+        , txt "enter   switch to call site view"
+        , txt "M       switch to module level breakdown"
+        , txt "i       display profiling info"
+        , txt "h       display help message"
+        , txt "t       sort by time"
+        , txt "a       sort by allocation"
+        , txt "e       sort by number of entries"
         ]
     drawView = \case
       AggregatesView {..} -> viewport AggregatesViewport Vertical $
