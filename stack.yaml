@@ -1,11 +1,8 @@
-resolver: lts-7.13
+resolver: lts-7.16
 packages:
 - .
-- location:
-    git: git@github.com:jtdaugherty/brick.git
-    commit: "764610f"
-  extra-dep: true
 extra-deps:
 - ghc-prof-1.3.0
 - text-zipper-0.9
 - vty-5.14
+- brick-0.16

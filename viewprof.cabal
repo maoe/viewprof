@@ -19,7 +19,7 @@ executable viewprof
   build-depends:
       base >= 4.9 && < 4.10
     , attoparsec
-    , brick
+    , brick >= 0.16
     , containers
     , ghc-prof >= 1.3.0
     , lens
