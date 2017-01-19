@@ -14,6 +14,7 @@ cache:
   directories:
     - $HOME/.cabal/packages
     - $HOME/.cabal/store
+    - $HOME/.stack
 
 before_cache:
   - rm -fv $HOME/.cabal/packages/hackage.haskell.org/build-reports.log
@@ -35,6 +36,10 @@ before_install:
  - unset CC
  - PATH=/opt/ghc/bin:/opt/ghc-ppa-tools/bin:$PATH
  - PKGNAME='viewprof'
+ # Download and unpack the stack executable
+ - mkdir -p ~/.local/bin
+ - export PATH=$HOME/.local/bin:$PATH
+ - travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
 
 install:
  - cabal --version
@@ -48,6 +53,7 @@ install:
  - rm -f cabal.project.freeze
  - cabal new-build -w ${HC} ${TEST} ${BENCH} --dep -j2
  - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --dep -j2
+ - stack --no-terminal --install-ghc test --only-dependencies
 
 # Here starts the actual work to be performed for the package under test;
 # any command which exits with a non-zero exit code causes the build to fail.
