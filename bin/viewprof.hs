@@ -1,6 +1,8 @@
 {-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -21,6 +23,8 @@ import Control.Lens hiding (views)
 import Data.Set (Set)
 import Graphics.Vty
 import qualified Brick
+import qualified Brick.Widgets.Border as Brick
+import qualified Brick.Widgets.Center as Brick
 import qualified Data.Scientific as Sci
 import qualified Data.Set as Set
 import qualified Data.Text.Lazy.IO as TL
@@ -31,6 +35,7 @@ import qualified GHC.Prof as Prof
 data Profile = Profile
   { _report :: Prof.Profile
   , _views :: NonEmpty View
+  , _modalView :: Maybe ModalView
   , _lastKeyEvent :: !(Maybe (Key, [Modifier]))
   }
 
@@ -49,6 +54,10 @@ data View
     { _modules :: !(V.Vector Prof.AggregateModule)
     , _focus :: !Int
     }
+
+data ModalView
+  = InfoView
+  | HelpView
 
 makeLenses ''Profile
 makeLenses ''View
@@ -79,6 +88,7 @@ parseProfile path = do
         { _costCentres = V.fromList (Prof.aggregateCostCentres prof)
         , _focus = 0
         } :| []
+      , _modalView = Nothing
       , _lastKeyEvent = Nothing
       }
 
@@ -100,9 +110,12 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       invalidateCache
       continue prof
     EvKey key []
-      | key `elem` [KEsc, KChar 'q'] -> if null (NE.tail (prof ^. views))
-        then halt prof
-        else do
+      | key `elem` [KEsc, KChar 'q'] -> if
+        | Just _ <- prof ^. modalView -> do
+          invalidateCache
+          continue $! prof & modalView .~ Nothing
+        | null (NE.tail (prof ^. views)) -> halt prof
+        | otherwise -> do
           invalidateCache
           continue $! popView prof
       | key `elem` [KUp, KChar 'k'] -> do
@@ -129,6 +142,10 @@ handleProfileEvent prof@Profile {..} ev = case ev of
       | key `elem` [KChar 'G'] -> do
         invalidateCache
         continue $! moveToEnd prof
+      | key `elem` [KChar 'i'] ->
+        continue $! prof & modalView ?~ InfoView
+      | key `elem` [KChar 'h', KChar '?'] ->
+        continue $! prof & modalView ?~ HelpView
     _ -> case NE.head _views of
       AggregatesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
@@ -236,33 +253,57 @@ selectedAttr :: AttrName
 selectedAttr = "selected"
 
 drawProfile :: Profile -> [Widget Name]
-drawProfile prof = do
-  viewState <- NE.toList $ prof ^. views
-  return $ case viewState of
-    AggregatesView {..} -> viewport AggregatesViewport Vertical $
-      vBox $ V.toList $
-        flip V.imap _costCentres $ \i row -> cached (AggregatesCache i) $
-          let widget = drawAggregateCostCentre row
-          in if i == _focus
-            then withAttr selectedAttr (visible widget)
-            else widget
-    CallSitesView {..} -> viewport CallSitesViewport Vertical $
-      vBox
-        [ drawAggregateCostCentre _callee
-        , vBox $ V.toList $ flip V.imap _callSites $ \i row ->
-          cached (CallSitesCache i) $
-            let widget = drawCallSite _callee row
+drawProfile prof =
+  [ maybe emptyWidget (Brick.centerLayer . drawModalView) (prof ^. modalView)
+  , drawView $ NE.head $ prof ^. views
+  ]
+  where
+    drawModalView = \case
+      InfoView -> Brick.border $ vBox
+        [ txt $ prof ^. report . to Prof.profileCommandLine
+        -- TODO: add more
+        ]
+      HelpView -> Brick.borderWithLabel (txt "Help") $ vBox
+        [ txt "Keyboard shortcuts"
+        , txt "q       quit current view"
+        , txt "j,down  move down"
+        , txt "k,up    move up"
+        , txt "gg      move to the top"
+        , txt "G       move to the bottom"
+        , txt "C       switch to aggregate cost centre view"
+        , txt "enter   switch to call site view"
+        , txt "M       switch to module level breakdown"
+        , txt "i       display profiling info"
+        , txt "h       display help message"
+        , txt "t       sort by time"
+        , txt "a       sort by allocation"
+        , txt "e       sort by number of entries"
+        ]
+    drawView = \case
+      AggregatesView {..} -> viewport AggregatesViewport Vertical $
+        vBox $ V.toList $
+          flip V.imap _costCentres $ \i row -> cached (AggregatesCache i) $
+            let widget = drawAggregateCostCentre row
             in if i == _focus
               then withAttr selectedAttr (visible widget)
               else widget
-        ]
-    ModulesView {..} -> viewport ModulesViewport Vertical $
-      vBox $ V.toList $
-        flip V.imap _modules $ \i row -> cached (ModulesCache i) $
-          let widget = drawAggregateModule row
-          in if i == _focus
-            then withAttr selectedAttr (visible widget)
-            else widget
+      CallSitesView {..} -> viewport CallSitesViewport Vertical $
+        vBox
+          [ drawAggregateCostCentre _callee
+          , vBox $ V.toList $ flip V.imap _callSites $ \i row ->
+            cached (CallSitesCache i) $
+              let widget = drawCallSite _callee row
+              in if i == _focus
+                then withAttr selectedAttr (visible widget)
+                else widget
+          ]
+      ModulesView {..} -> viewport ModulesViewport Vertical $
+        vBox $ V.toList $
+          flip V.imap _modules $ \i row -> cached (ModulesCache i) $
+            let widget = drawAggregateModule row
+            in if i == _focus
+              then withAttr selectedAttr (visible widget)
+              else widget
 
 drawAggregateCostCentre :: Prof.AggregateCostCentre -> Widget n
 drawAggregateCostCentre Prof.AggregateCostCentre {..} = hBox
