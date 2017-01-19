@@ -11,7 +11,7 @@ category: Development
 build-type: Simple
 extra-source-files: CHANGELOG.md
 cabal-version: >= 1.10
-tested-with: GHC == 8.0.1
+tested-with: GHC == 8.0.2
 
 executable viewprof
   main-is: viewprof.hs
