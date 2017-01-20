@@ -38,4 +38,4 @@ stack install viewprof
 
 ## Acknowledgement
 
-`viewprof` was originally meant to be a Haskell port of [mkotha/viewprof](https://github.com/mkotha/viewprofhttps://github.com/mkotha/viewprof), which is a text-based .prof viewer written in Common Lisp.
+`viewprof` was originally meant to be a Haskell port of [mkotha/viewprof](https://github.com/mkotha/viewprof), which is a text-based .prof viewer written in Common Lisp.
