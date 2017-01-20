@@ -1,0 +1,10 @@
+*~
+/*.sublime-*
+/.cabal-sandbox/
+/.stack-work/
+/cabal-dev/
+/cabal.project.local
+/cabal.sandbox.config
+/dist-newstyle/
+/dist/
+TAGS
