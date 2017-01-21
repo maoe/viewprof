@@ -1,4 +1,8 @@
 # viewprof
+[![Hackage](https://img.shields.io/hackage/v/viewprof.svg)]()
+[![Hackage-Deps](https://img.shields.io/hackage-deps/v/viewprof.svg)]()
+[![Stackage Nightly](http://stackage.org/package/viewprof/badge/nightly)](http://stackage.org/nightly/package/viewprof)
+[![Build Status](https://travis-ci.org/maoe/viewprof.svg?branch=master)](https://travis-ci.org/maoe/viewprof)
 
 viewprof is a text-based interactive GHC .prof viewer.
 
