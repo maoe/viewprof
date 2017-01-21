@@ -26,7 +26,7 @@ stack install viewprof
 
 | keys              | action                                      |
 |-------------------|---------------------------------------------|
-| `q`               | quit the current view                       |
+| `q` or `escape`   | quit the current view                       |
 | `j` or `↓`        | move focus down     　 　　　　　　           |
 | `k` or `↑`        | move focus up         　　　　　　　          |
 | `gg`              | move focus to the top                       |
