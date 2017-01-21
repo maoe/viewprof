@@ -1,6 +1,6 @@
 # viewprof
-[![Hackage](https://img.shields.io/hackage/v/viewprof.svg)]()
-[![Hackage-Deps](https://img.shields.io/hackage-deps/v/viewprof.svg)]()
+[![Hackage](https://img.shields.io/hackage/v/viewprof.svg)](https://hackage.haskell.org/package/viewprof)
+[![Hackage-Deps](https://img.shields.io/hackage-deps/v/viewprof.svg)](http://packdeps.haskellers.com/feed?needle=viewprof)
 [![Stackage Nightly](http://stackage.org/package/viewprof/badge/nightly)](http://stackage.org/nightly/package/viewprof)
 [![Build Status](https://travis-ci.org/maoe/viewprof.svg?branch=master)](https://travis-ci.org/maoe/viewprof)
 
