@@ -11,13 +11,14 @@ maintainer: Mitsutoshi Aoe <maoe@foldr.in>
 copyright: Copyright (C) 2016-2017 Mitsutoshi Aoe
 category: Development
 build-type: Simple
-extra-source-files: CHANGELOG.md
+extra-source-files:
+  CHANGELOG.md
+  README.md
 cabal-version: >= 1.10
 tested-with: GHC == 8.0.2
 
 executable viewprof
   main-is: viewprof.hs
-  -- other-extensions:
   build-depends:
       base >= 4.9 && < 4.10
     , brick >= 0.16 && < 0.17
