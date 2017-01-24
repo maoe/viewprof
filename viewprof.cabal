@@ -1,5 +1,5 @@
 name: viewprof
-version: 0.0.0
+version: 0.0.0.1
 synopsis: Text-based interactive GHC .prof viewer
 description: Text-based interactive GHC .prof viewer
 homepage: https://github.com/maoe/viewprof
@@ -21,7 +21,7 @@ executable viewprof
   main-is: viewprof.hs
   build-depends:
       base >= 4.9 && < 4.10
-    , brick >= 0.16 && < 0.17
+    , brick >= 0.16 && < 0.18
     , containers >= 0.5.7 && < 0.6
     , ghc-prof >= 1.3.0 && < 1.4
     , lens >= 4.14 && < 4.16
@@ -29,7 +29,7 @@ executable viewprof
     , text >= 1.2.2.0 && < 1.3
     , vector >= 0.10.12.3 && < 0.13
     , vector-algorithms >= 0.6.0.4 && < 0.8
-    , vty >= 5.13 && < 5.15
+    , vty >= 5.13 && < 5.16
   hs-source-dirs: bin
   default-language: Haskell2010
   ghc-options: -Wall -threaded
