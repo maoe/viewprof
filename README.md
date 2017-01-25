@@ -19,7 +19,7 @@ It has three display modes:
 Note: Currently viewprof doesn't support Windows because the underlying library (vty) doesn't support it yet. See [#1](https://github.com/maoe/viewprof/issues/1).
 
 ```
-stack install viewprof
+stack install --resolver=nightly viewprof
 ```
 
 ## Usage
