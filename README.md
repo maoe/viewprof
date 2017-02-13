@@ -1,4 +1,9 @@
 # viewprof
+[![Hackage](https://img.shields.io/hackage/v/viewprof.svg)](https://hackage.haskell.org/package/viewprof)
+[![Hackage-Deps](https://img.shields.io/hackage-deps/v/viewprof.svg)](http://packdeps.haskellers.com/feed?needle=viewprof)
+[![Stackage LTS](http://stackage.org/package/viewprof/badge/lts)](http://stackage.org/lts/package/viewprof)
+[![Stackage Nightly](http://stackage.org/package/viewprof/badge/nightly)](http://stackage.org/nightly/package/viewprof)
+[![Build Status](https://travis-ci.org/maoe/viewprof.svg?branch=master)](https://travis-ci.org/maoe/viewprof)
 
 viewprof is a text-based interactive GHC .prof viewer.
 
@@ -22,7 +27,7 @@ stack install viewprof
 
 | keys              | action                                      |
 |-------------------|---------------------------------------------|
-| `q`               | quit the current view                       |
+| `q` or `escape`   | quit the current view                       |
 | `j` or `↓`        | move focus down     　 　　　　　　           |
 | `k` or `↑`        | move focus up         　　　　　　　          |
 | `gg`              | move focus to the top                       |
@@ -38,4 +43,4 @@ stack install viewprof
 
 ## Acknowledgement
 
-`viewprof` was originally meant to be a Haskell port of [mkotha/viewprof](https://github.com/mkotha/viewprofhttps://github.com/mkotha/viewprof), which is a text-based .prof viewer written in Common Lisp.
+`viewprof` was originally meant to be a Haskell port of [mkotha/viewprof](https://github.com/mkotha/viewprof), which is a text-based .prof viewer written in Common Lisp.
