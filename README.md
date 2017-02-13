@@ -1,6 +1,7 @@
 # viewprof
 [![Hackage](https://img.shields.io/hackage/v/viewprof.svg)](https://hackage.haskell.org/package/viewprof)
 [![Hackage-Deps](https://img.shields.io/hackage-deps/v/viewprof.svg)](http://packdeps.haskellers.com/feed?needle=viewprof)
+[![Stackage LTS](http://stackage.org/package/viewprof/badge/lts)](http://stackage.org/lts/package/viewprof)
 [![Stackage Nightly](http://stackage.org/package/viewprof/badge/nightly)](http://stackage.org/nightly/package/viewprof)
 [![Build Status](https://travis-ci.org/maoe/viewprof.svg?branch=master)](https://travis-ci.org/maoe/viewprof)
 
@@ -19,7 +20,7 @@ It has three display modes:
 Note: Currently viewprof doesn't support Windows because the underlying library (vty) doesn't support it yet. See [#1](https://github.com/maoe/viewprof/issues/1).
 
 ```
-stack install --resolver=nightly viewprof
+stack install viewprof
 ```
 
 ## Usage
