@@ -41,12 +41,12 @@ data Profile = Profile
 
 data View
   = AggregatesView
-    { _costCentres :: !(V.Vector Prof.AggregateCostCentre)
+    { _costCentres :: !(V.Vector Prof.AggregatedCostCentre)
     , _focus :: !Int
     }
   | CallSitesView
-    { _callee :: !Prof.AggregateCostCentre
-    , _callSites :: !(V.Vector (Prof.CallSite Prof.AggregateCostCentre))
+    { _callee :: !Prof.AggregatedCostCentre
+    , _callSites :: !(V.Vector (Prof.CallSite Prof.AggregatedCostCentre))
     , _focus :: !Int
     , _expanded :: !(Set Int)
     }
@@ -85,7 +85,7 @@ parseProfile path = do
     Right prof -> return Profile
       { _report = prof
       , _views = AggregatesView
-        { _costCentres = V.fromList (Prof.aggregateCostCentres prof)
+        { _costCentres = V.fromList (Prof.aggregatedCostCentres prof)
         , _focus = 0
         } :| []
       , _modalView = Nothing
@@ -151,17 +151,17 @@ handleProfileEvent prof@Profile {..} ev = case ev of
         EvKey (KChar 't') [] -> do
           invalidateCache
           continue $! sortCostCentresBy
-            (Prof.aggregateCostCentreTime &&& Prof.aggregateCostCentreAlloc)
+            (Prof.aggregatedCostCentreTime &&& Prof.aggregatedCostCentreAlloc)
             prof
         EvKey (KChar 'a') [] -> do
           invalidateCache
           continue $! sortCostCentresBy
-            (Prof.aggregateCostCentreAlloc &&& Prof.aggregateCostCentreTime)
+            (Prof.aggregatedCostCentreAlloc &&& Prof.aggregatedCostCentreTime)
             prof
         EvKey (KChar 'e') [] -> do
           invalidateCache
           continue $! sortCostCentresBy
-            Prof.aggregateCostCentreEntries
+            Prof.aggregatedCostCentreEntries
             prof
         EvKey key []
           | key `elem` [KEnter] -> do
@@ -204,16 +204,16 @@ handleProfileEvent prof@Profile {..} ev = case ev of
     sortCallSitesBy key p = p & topView . callSites
       %~ V.modify (Merge.sortBy (flip compare `on` key))
     displayCostCentres p = p & views .~ AggregatesView
-      { _costCentres = V.fromList $ Prof.aggregateCostCentres $ p ^. report
+      { _costCentres = V.fromList $ Prof.aggregatedCostCentres $ p ^. report
       , _focus = 0
       } NE.:| []
     displayCallers p = fromMaybe p $ do
       let !model = p ^. topView . costCentres
           !idx = p ^. currentFocus
-      Prof.AggregateCostCentre {..} <- model V.!? idx
+      Prof.AggregatedCostCentre {..} <- model V.!? idx
       (_callee, callers) <- Prof.aggregateCallSites
-        aggregateCostCentreName
-        aggregateCostCentreModule
+        aggregatedCostCentreName
+        aggregatedCostCentreModule
         (p ^. report)
       return $! p & views %~ NE.cons CallSitesView
         { _callee
@@ -283,13 +283,13 @@ drawProfile prof =
       AggregatesView {..} -> viewport AggregatesViewport Vertical $
         vBox $ V.toList $
           flip V.imap _costCentres $ \i row -> cached (AggregatesCache i) $
-            let widget = drawAggregateCostCentre row
+            let widget = drawAggregatedCostCentre row
             in if i == _focus
               then withAttr selectedAttr (visible widget)
               else widget
       CallSitesView {..} -> viewport CallSitesViewport Vertical $
         vBox
-          [ drawAggregateCostCentre _callee
+          [ drawAggregatedCostCentre _callee
           , vBox $ V.toList $ flip V.imap _callSites $ \i row ->
             cached (CallSitesCache i) $
               let widget = drawCallSite _callee row
@@ -305,33 +305,33 @@ drawProfile prof =
               then withAttr selectedAttr (visible widget)
               else widget
 
-drawAggregateCostCentre :: Prof.AggregateCostCentre -> Widget n
-drawAggregateCostCentre Prof.AggregateCostCentre {..} = hBox
-  [ txt aggregateCostCentreModule
+drawAggregatedCostCentre :: Prof.AggregatedCostCentre -> Widget n
+drawAggregatedCostCentre Prof.AggregatedCostCentre {..} = hBox
+  [ txt aggregatedCostCentreModule
   , txt "."
-  , padRight Max $ txt aggregateCostCentreName
-  , maybe emptyWidget (padRight (Pad 1) . str . show) aggregateCostCentreEntries
-  , padRight (Pad 1) $ str (formatPercentage aggregateCostCentreTime)
-  , str (formatPercentage aggregateCostCentreAlloc)
+  , padRight Max $ txt aggregatedCostCentreName
+  , maybe emptyWidget (padRight (Pad 1) . str . show) aggregatedCostCentreEntries
+  , padRight (Pad 1) $ str (formatPercentage aggregatedCostCentreTime)
+  , str (formatPercentage aggregatedCostCentreAlloc)
   ]
 
 drawCallSite
-  :: Prof.AggregateCostCentre
-  -> Prof.CallSite Prof.AggregateCostCentre
+  :: Prof.AggregatedCostCentre
+  -> Prof.CallSite Prof.AggregatedCostCentre
   -> Widget n
-drawCallSite Prof.AggregateCostCentre {..} Prof.CallSite {..} = hBox
-  [ txt $ Prof.aggregateCostCentreModule callSiteCostCentre
+drawCallSite Prof.AggregatedCostCentre {..} Prof.CallSite {..} = hBox
+  [ txt $ Prof.aggregatedCostCentreModule callSiteCostCentre
   , txt "."
-  , padRight Max $ txt $ Prof.aggregateCostCentreName callSiteCostCentre
+  , padRight Max $ txt $ Prof.aggregatedCostCentreName callSiteCostCentre
   , padRight (Pad 1) $ str $ show callSiteContribEntries
   , padRight (Pad 1) $ hBox
-    [ str $ contribution callSiteContribTime aggregateCostCentreTime
+    [ str $ contribution callSiteContribTime aggregatedCostCentreTime
     , txt " ("
     , str $ formatPercentage callSiteContribTime
     , txt ")"
     ]
   , hBox
-    [ str $ contribution callSiteContribAlloc aggregateCostCentreAlloc
+    [ str $ contribution callSiteContribAlloc aggregatedCostCentreAlloc
     , txt " ("
     , str $ formatPercentage callSiteContribAlloc
     , txt ")"
