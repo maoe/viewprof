@@ -7,7 +7,7 @@
 
 viewprof is a text-based interactive GHC .prof viewer.
 
-![screenshot](./img/screenshot.png)
+![screenshot](img/screenshot.png)
 
 It has three display modes:
 
