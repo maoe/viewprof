@@ -1,0 +1,5 @@
+#!/bin/sh
+
+DOCKER_DIR=$(realpath $(dirname "$0"))
+
+docker build -f "$DOCKER_DIR/Dockerfile" -t viewprof .
