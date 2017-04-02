@@ -3,7 +3,7 @@ version: 0.0.0.2
 synopsis: Text-based interactive GHC .prof viewer
 description: Text-based interactive GHC .prof viewer
 homepage: https://github.com/maoe/viewprof
-bug-reports: https://github.com/maoe/lifted-async/issues
+bug-reports: https://github.com/maoe/viewprof/issues
 license: BSD3
 license-file: LICENSE
 author: Mitsutoshi Aoe
