@@ -32,12 +32,12 @@ stack install viewprof
 
 #### How to install and launch
 
-```bash
-$ git clone git@github.com:maoe/viewprof.git
-$ cd viewprof/docker
-$ docker-machine start
-$ docker build -t viewprof .
-$ .\viewprof.bat path/to/file.prof
+```bat
+git clone git@github.com:maoe/viewprof.git
+cd viewprof/docker
+docker-machine start
+docker build -t viewprof .
+.\viewprof.bat path/to/file.prof
 ```
 
 ## Usage
