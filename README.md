@@ -17,8 +17,6 @@ It has three display modes:
 
 ## Installation
 
-For Windows users, see below.
-
 ```
 stack install viewprof
 ```
