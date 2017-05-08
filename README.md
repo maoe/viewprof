@@ -17,10 +17,27 @@ It has three display modes:
 
 ## Installation
 
-Note: Currently viewprof doesn't support Windows because the underlying library (vty) doesn't support it yet. See [#1](https://github.com/maoe/viewprof/issues/1).
-
 ```
 stack install viewprof
+```
+
+### On Windows
+
+#### Prerequisites
+
+- [Docker for Windows](https://docs.docker.com/docker-for-windows/install/) or [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
+    - Currently tried with: [Docker Toolbox v17.04.0ce](https://github.com/docker/toolbox/releases/tag/v17.04.0-ce) on Windows 10 Home.
+- [cygpath](https://cygwin.com/cygwin-ug-net/cygpath.html)
+    - Bundled with [Cygwin](https://www.cygwin.com/), [MSYS2](http://www.msys2.org/) etc.
+
+#### How to install and launch
+
+```bat
+git clone git@github.com:maoe/viewprof.git
+cd viewprof/docker
+docker-machine start
+docker build -t viewprof .
+.\viewprof.bat path/to/file.prof
 ```
 
 ## Usage
