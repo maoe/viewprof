@@ -1,9 +1,9 @@
 name: viewprof
-version: 0.0.0.4
+version: 0.0.0.5
 synopsis: Text-based interactive GHC .prof viewer
 description: Text-based interactive GHC .prof viewer
 homepage: https://github.com/maoe/viewprof
-bug-reports: https://github.com/maoe/lifted-async/issues
+bug-reports: https://github.com/maoe/viewprof/issues
 license: BSD3
 license-file: LICENSE
 author: Mitsutoshi Aoe
@@ -14,6 +14,7 @@ build-type: Simple
 extra-source-files:
   CHANGELOG.md
   README.md
+  img/screenshot.png
 cabal-version: >= 1.10
 tested-with: GHC == 8.0.2
 
@@ -21,7 +22,7 @@ executable viewprof
   main-is: viewprof.hs
   build-depends:
       base >= 4.9 && < 4.10
-    , brick >= 0.16 && < 0.20
+    , brick >= 0.16 && < 0.21
     , containers >= 0.5.7 && < 0.6
     , ghc-prof >= 1.4 && < 1.5
     , lens >= 4.14 && < 4.16

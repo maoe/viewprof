@@ -1,4 +1,6 @@
 *~
+.DS_Store
+.ghc.*
 /*.sublime-*
 /.cabal-sandbox/
 /.stack-work/
