@@ -1,5 +1,10 @@
 # Revision history for viewprof
 
+## 0.0.0.5 (2017-07-10)
+
+* Relax upper version bound for brick
+* Add Docker support on Windows
+
 ## 0.0.0.4 (2017-06-28)
 
 * Relax upper version bound for brick
