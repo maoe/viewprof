@@ -30,7 +30,7 @@ executable viewprof
     , text >= 1.2.2.0 && < 1.3
     , vector >= 0.10.12.3 && < 0.13
     , vector-algorithms >= 0.6.0.4 && < 0.8
-    , vty >= 5.13 && < 5.16
+    , vty >= 5.13 && < 5.17
   hs-source-dirs: bin
   default-language: Haskell2010
   ghc-options: -Wall -threaded
