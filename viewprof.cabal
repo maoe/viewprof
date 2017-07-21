@@ -1,5 +1,5 @@
 name: viewprof
-version: 0.0.0.5
+version: 0.0.0.6
 synopsis: Text-based interactive GHC .prof viewer
 description: Text-based interactive GHC .prof viewer
 homepage: https://github.com/maoe/viewprof
