@@ -1,5 +1,5 @@
 name: viewprof
-version: 0.0.0.6
+version: 0.0.0.7
 synopsis: Text-based interactive GHC .prof viewer
 description: Text-based interactive GHC .prof viewer
 homepage: https://github.com/maoe/viewprof
@@ -21,7 +21,7 @@ tested-with: GHC == 8.0.2
 executable viewprof
   main-is: viewprof.hs
   build-depends:
-      base >= 4.9 && < 4.10
+      base >= 4.9 && < 4.11
     , brick >= 0.16 && < 0.21
     , containers >= 0.5.7 && < 0.6
     , ghc-prof >= 1.4 && < 1.5

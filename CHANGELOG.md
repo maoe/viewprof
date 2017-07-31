@@ -1,6 +1,10 @@
 # Revision history for viewprof
 
-## 0.0.0.5 - 2017-07-21
+## 0.0.0.7 - 2017-07-31
+
+* Relax upper version bound for base
+
+## 0.0.0.6 - 2017-07-21
 
 * Relax upper version bound for vty
 
