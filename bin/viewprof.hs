@@ -12,9 +12,10 @@ import Control.Arrow ((&&&))
 import Control.Monad
 import Data.Foldable
 import Data.Function (on)
-import Data.List.NonEmpty
+import Data.List.NonEmpty hiding (head, length)
 import Data.Maybe
 import System.Environment
+import System.Exit (exitFailure)
 import Text.Printf
 import qualified Data.List.NonEmpty as NE
 
@@ -71,10 +72,27 @@ data Name
   | ModulesCache !Int
   deriving (Eq, Ord, Show)
 
+data Args =
+  Args { profilePath :: FilePath
+       }
+
+usage :: IO a
+usage = do
+  pn <- getProgName
+  putStrLn $ "Usage: " ++ pn ++ " <file.prof>"
+  exitFailure
+
+parseArgs :: IO Args
+parseArgs = do
+  args <- getArgs
+  if length args /= 1
+     then usage
+     else return $ Args (head args)
+
 main :: IO ()
 main = do
-  path:_ <- getArgs
-  profile <- parseProfile path
+  args <- parseArgs
+  profile <- parseProfile $ profilePath args
   void $ defaultMain app profile
 
 parseProfile :: FilePath -> IO Profile
