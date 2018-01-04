@@ -14,6 +14,7 @@ import Data.Foldable
 import Data.Function (on)
 import Data.List.NonEmpty hiding (head, length)
 import Data.Maybe
+import System.Directory (doesFileExist)
 import System.Environment
 import System.Exit (exitFailure)
 import Text.Printf
@@ -85,9 +86,15 @@ usage = do
 parseArgs :: IO Args
 parseArgs = do
   args <- getArgs
-  if length args /= 1
-     then usage
-     else return $ Args (head args)
+  case args of
+    [arg] -> validateArgs (Args arg)
+    _ -> usage
+  where
+    validateArgs :: Args -> IO Args
+    validateArgs args = do
+      b <- doesFileExist (profilePath args)
+      unless b usage
+      pure args
 
 main :: IO ()
 main = do
