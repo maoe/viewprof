@@ -72,9 +72,9 @@ data Name
   | ModulesCache !Int
   deriving (Eq, Ord, Show)
 
-data Args =
-  Args { profilePath :: FilePath
-       }
+data Args = Args
+  { profilePath :: FilePath
+  }
 
 usage :: IO a
 usage = do
