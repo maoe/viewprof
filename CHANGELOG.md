@@ -3,6 +3,7 @@
 ## 0.0.0.13 - 2018-01-22
 
 * Relax upper version bound for brick
+* Better argument handling (#7 and #9)
 
 ## 0.0.0.12 - 2017-12-12
 
