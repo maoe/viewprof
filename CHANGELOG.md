@@ -1,5 +1,9 @@
 # Revision history for viewprof
 
+## 0.0.0.14 - 2018-03-06
+
+* Relax upper version bounds for brick, lens and vty
+
 ## 0.0.0.13 - 2018-01-22
 
 * Relax upper version bound for brick
