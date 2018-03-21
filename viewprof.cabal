@@ -16,7 +16,8 @@ extra-source-files:
   README.md
   img/screenshot.png
 cabal-version: >= 1.10
-tested-with: GHC == 8.0.2
+tested-with:
+  GHC == 8.0.2 || == 8.2.2 || == 8.4.1
 
 executable viewprof
   main-is: viewprof.hs
