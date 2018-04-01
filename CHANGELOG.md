@@ -2,7 +2,7 @@
 
 ## 0.0.0.16 - 2018-04-02
 
-* Relax upper version bounds for brick
+* Relax upper version bound for brick
 
 ## 0.0.0.15 - 2018-03-21
 
