@@ -1,5 +1,5 @@
 name: viewprof
-version: 0.0.0.18
+version: 0.0.0.19
 synopsis: Text-based interactive GHC .prof viewer
 description:
    viewprof is a text-based interactive GHC .prof viewer.
