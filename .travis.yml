@@ -46,6 +46,7 @@ matrix:
 
   allow_failures:
     - compiler: "ghc-head"
+    - compiler: "ghc-8.0.2" # causing memory exhaustion on Travis
 
 before_install:
   - HC=${CC}
