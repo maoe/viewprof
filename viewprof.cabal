@@ -21,13 +21,13 @@ extra-source-files:
   img/screenshot.png
 cabal-version: >= 1.10
 tested-with:
-  GHC == 8.0.2 || == 8.2.2 || == 8.4.1
+  GHC == 8.0.2 || == 8.2.2 || == 8.4.4 || == 8.6.2
 
 executable viewprof
   main-is: viewprof.hs
   build-depends:
-      base >= 4.9 && < 4.12
-    , brick >= 0.16 && < 0.42
+      base >= 4.9 && < 4.13
+    , brick > 0.26.1 && < 0.42
     , containers >= 0.5.7 && < 0.7
     , directory >= 1.3 && < 1.4
     , ghc-prof >= 1.4 && < 1.5
@@ -35,8 +35,8 @@ executable viewprof
     , scientific >= 0.3.4.4 && < 0.4
     , text >= 1.2.2.0 && < 1.3
     , vector >= 0.10.12.3 && < 0.13
-    , vector-algorithms >= 0.6.0.4 && < 0.8
-    , vty >= 5.13 && < 5.25
+    , vector-algorithms >= 0.6.0.4 && < 0.9
+    , vty >= 5.13 && < 5.26
   hs-source-dirs: bin
   default-language: Haskell2010
   ghc-options: -Wall -threaded
