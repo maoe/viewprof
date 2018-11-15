@@ -1,5 +1,11 @@
 # Revision history for viewprof
 
+## 0.0.0.24 - 2018-11-15
+
+* Add support for GHC 8.6
+    * Relax upper version bounds for base, vector-algorithms, and vty
+    * Tighten lower version bound for brick to guide the dep solver
+
 ## 0.0.0.23 - 2018-09-07
 
 * Relax upper version bounds for brick and vty
