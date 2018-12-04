@@ -1,5 +1,9 @@
 # Revision history for viewprof
 
+## 0.0.0.25 - 2018-12-04
+
+* Relax upper version bound for brick
+
 ## 0.0.0.24 - 2018-11-15
 
 * Add support for GHC 8.6
