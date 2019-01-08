@@ -1,5 +1,5 @@
 name: viewprof
-version: 0.0.0.26
+version: 0.0.0.27
 synopsis: Text-based interactive GHC .prof viewer
 description:
    viewprof is a text-based interactive GHC .prof viewer.
@@ -11,8 +11,8 @@ bug-reports: https://github.com/maoe/viewprof/issues
 license: BSD3
 license-file: LICENSE
 author: Mitsutoshi Aoe
-maintainer: Mitsutoshi Aoe <maoe@foldr.in>
-copyright: Copyright (C) 2016-2018 Mitsutoshi Aoe
+maintainer: Mitsutoshi Aoe <me@maoe.name>
+copyright: Copyright (C) 2016-2019 Mitsutoshi Aoe
 category: Development
 build-type: Simple
 extra-source-files:
@@ -27,7 +27,7 @@ executable viewprof
   main-is: viewprof.hs
   build-depends:
       base >= 4.9 && < 4.13
-    , brick > 0.26.1 && < 0.46
+    , brick > 0.26.1 && < 0.47
     , containers >= 0.5.7 && < 0.7
     , directory >= 1.3 && < 1.4
     , ghc-prof >= 1.4 && < 1.5
