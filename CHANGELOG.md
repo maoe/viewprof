@@ -1,5 +1,9 @@
 # Revision history for viewprof
 
+## 0.0.0.29 - 2019-08-31
+
+* Relax upper version bound for brick
+
 ## 0.0.0.28 - 2019-03-21
 
 * Relax upper version bound for brick
