@@ -1,8 +1,7 @@
 # viewprof
+
 [![Hackage](https://img.shields.io/hackage/v/viewprof.svg)](https://hackage.haskell.org/package/viewprof)
 [![Hackage-Deps](https://img.shields.io/hackage-deps/v/viewprof.svg)](http://packdeps.haskellers.com/feed?needle=viewprof)
-[![Stackage LTS](http://stackage.org/package/viewprof/badge/lts)](http://stackage.org/lts/package/viewprof)
-[![Stackage Nightly](http://stackage.org/package/viewprof/badge/nightly)](http://stackage.org/nightly/package/viewprof)
 [![Build Status](https://travis-ci.org/maoe/viewprof.svg?branch=master)](https://travis-ci.org/maoe/viewprof)
 
 viewprof is a text-based interactive GHC .prof viewer.
@@ -17,7 +16,7 @@ It has three display modes:
 
 ## Installation
 
-```
+```sh
 stack install viewprof
 ```
 
@@ -25,10 +24,10 @@ stack install viewprof
 
 #### Prerequisites
 
-- [Docker for Windows](https://docs.docker.com/docker-for-windows/install/) or [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
-    - Currently tried with: [Docker Toolbox v17.04.0ce](https://github.com/docker/toolbox/releases/tag/v17.04.0-ce) on Windows 10 Home.
-- [cygpath](https://cygwin.com/cygwin-ug-net/cygpath.html)
-    - Bundled with [Cygwin](https://www.cygwin.com/), [MSYS2](http://www.msys2.org/) etc.
+* [Docker for Windows](https://docs.docker.com/docker-for-windows/install/) or [Docker Toolbox](https://docs.docker.com/toolbox/overview/).
+  * Currently tried with: [Docker Toolbox v17.04.0ce](https://github.com/docker/toolbox/releases/tag/v17.04.0-ce) on Windows 10 Home.
+* [cygpath](https://cygwin.com/cygwin-ug-net/cygpath.html)
+  * Bundled with [Cygwin](https://www.cygwin.com/), [MSYS2](http://www.msys2.org/) etc.
 
 #### How to install and launch
 
