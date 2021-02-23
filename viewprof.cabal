@@ -1,3 +1,4 @@
+cabal-version: 2.4
 name: viewprof
 version: 0.0.0.33
 synopsis: Text-based interactive GHC .prof viewer
@@ -8,40 +9,40 @@ description:
    <https://github.com/maoe/viewprof#readme the README>.
 homepage: https://github.com/maoe/viewprof
 bug-reports: https://github.com/maoe/viewprof/issues
-license: BSD3
+license: BSD-3-Clause
 license-file: LICENSE
 author: Mitsutoshi Aoe
 maintainer: Mitsutoshi Aoe <me@maoe.name>
-copyright: Copyright (C) 2016-2020 Mitsutoshi Aoe
+copyright: Copyright (C) 2016-2021 Mitsutoshi Aoe
 category: Development
 build-type: Simple
 extra-source-files:
   CHANGELOG.md
   README.md
   img/screenshot.png
-cabal-version: >= 1.10
 tested-with:
   GHC == 8.0.2
     || == 8.2.2
     || == 8.4.4
     || == 8.6.5
-    || == 8.8.3
-    || == 8.10.1
+    || == 8.8.4
+    || == 8.10.4
+    || == 9.0.1
 
 executable viewprof
   main-is: viewprof.hs
   build-depends:
-      base >= 4.9 && < 4.15
-    , brick > 0.26.1 && < 0.54
+      base >= 4.9 && < 4.16
+    , brick > 0.26.1 && < 0.61
     , containers >= 0.5.7 && < 0.7
     , directory >= 1.3 && < 1.4
     , ghc-prof >= 1.4 && < 1.5
-    , lens >= 4.14 && < 4.20
+    , lens >= 4.14 && < 5.1
     , scientific >= 0.3.4.4 && < 0.4
     , text >= 1.2.2.0 && < 1.3
     , vector >= 0.10.12.3 && < 0.13
     , vector-algorithms >= 0.6.0.4 && < 0.9
-    , vty >= 5.13 && < 5.29
+    , vty >= 5.13 && < 5.34
   hs-source-dirs: bin
   default-language: Haskell2010
   ghc-options: -Wall -threaded
