@@ -1,5 +1,9 @@
 # Revision history for viewprof
 
+## 0.0.1.0 - 2023-06-?
+
+* Upgrade to GHC 9.2.
+
 ## 0.0.0.33 - 2020-05-05
 
 * Relax upper version bound for base, brick, lens, and vty
