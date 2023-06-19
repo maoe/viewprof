@@ -122,98 +122,98 @@ app = App
   { appDraw = drawProfile
   , appChooseCursor = neverShowCursor
   , appHandleEvent = handleProfileEvent
-  , appStartEvent = return
+  , appStartEvent = pure ()
   , appAttrMap = const $ attrMap defAttr
     [ (selectedAttr, black `Brick.on` white)
     ]
   }
 
-handleProfileEvent :: Profile -> BrickEvent Name e -> EventM Name (Next Profile)
-handleProfileEvent prof@Profile {..} ev = case ev of
+handleProfileEvent :: BrickEvent Name e -> EventM Name Profile ()
+handleProfileEvent ev = get >>= \prof@Profile {..} -> case ev of
   VtyEvent vtyEv -> case vtyEv of
     EvResize {} -> do
       invalidateCache
-      continue prof
+      put prof
     EvKey key []
       | key `elem` [KEsc, KChar 'q'] -> if
         | Just _ <- prof ^. modalView -> do
           invalidateCache
-          continue $! prof & modalView .~ Nothing
-        | null (NE.tail (prof ^. views)) -> halt prof
+          put $! prof & modalView .~ Nothing
+        | null (NE.tail (prof ^. views)) -> halt
         | otherwise -> do
           invalidateCache
-          continue $! popView prof
+          put $! popView prof
       | key `elem` [KUp, KChar 'k'] -> do
         let !pos = prof ^. currentFocus
         for_ [pos, pos-1] $ invalidateCacheEntry . currentCacheEntry prof
-        continue $! moveUp prof
+        put $! moveUp prof
       | key `elem` [KDown, KChar 'j'] -> do
         let !pos = prof ^. currentFocus
         for_ [pos, pos+1] $ invalidateCacheEntry . currentCacheEntry prof
-        continue $! moveDown prof
+        put $! moveDown prof
       | key `elem` [KChar 'C'] -> do
         invalidateCache
-        continue $! displayCostCentres prof
+        put $! displayCostCentres prof
       | key `elem` [KChar 'M'] -> do
         invalidateCache
-        continue $! displayModules prof
+        put $! displayModules prof
       | key `elem` [KChar 'g'] ->
         if prof ^. lastKeyEvent == Just (KChar 'g', [])
           then do
             invalidateCache
-            continue $! moveToTop $ prof & lastKeyEvent .~ Nothing
+            put $! moveToTop $ prof & lastKeyEvent .~ Nothing
           else
-            continue $! prof & lastKeyEvent .~ Just (key, [])
+            put $! prof & lastKeyEvent .~ Just (key, [])
       | key `elem` [KChar 'G'] -> do
         invalidateCache
-        continue $! moveToEnd prof
+        put $! moveToEnd prof
       | key `elem` [KChar 'i'] ->
-        continue $! prof & modalView ?~ InfoView
+        put $! prof & modalView ?~ InfoView
       | key `elem` [KChar 'h', KChar '?'] ->
-        continue $! prof & modalView ?~ HelpView
+        put $! prof & modalView ?~ HelpView
     _ -> case NE.head _views of
       AggregatesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
           invalidateCache
-          continue $! sortCostCentresBy
+          put $! sortCostCentresBy
             (Prof.aggregatedCostCentreTime &&& Prof.aggregatedCostCentreAlloc)
             prof
         EvKey (KChar 'a') [] -> do
           invalidateCache
-          continue $! sortCostCentresBy
+          put $! sortCostCentresBy
             (Prof.aggregatedCostCentreAlloc &&& Prof.aggregatedCostCentreTime)
             prof
         EvKey (KChar 'e') [] -> do
           invalidateCache
-          continue $! sortCostCentresBy
+          put $! sortCostCentresBy
             Prof.aggregatedCostCentreEntries
             prof
         EvKey key []
           | key `elem` [KEnter] -> do
             invalidateCache
-            continue $! displayCallers prof
-        _ -> continue prof
+            put $! displayCallers prof
+        _ -> put prof
       CallSitesView {} -> case vtyEv of
         EvKey (KChar 't') [] -> do
           invalidateCache
-          continue $! sortCallSitesBy
+          put $! sortCallSitesBy
             (Prof.callSiteContribTime &&& Prof.callSiteContribAlloc)
             prof
         EvKey (KChar 'a') [] -> do
           invalidateCache
-          continue $! sortCallSitesBy
+          put $! sortCallSitesBy
             (Prof.callSiteContribAlloc &&& Prof.callSiteContribTime)
             prof
         EvKey (KChar 'e') [] -> do
           invalidateCache
-          continue $! sortCallSitesBy
+          put $! sortCallSitesBy
             Prof.callSiteContribEntries
             prof
-        _ -> continue prof
-      ModulesView {} -> continue prof
-  _ -> continue prof
+        _ -> put prof
+      ModulesView {} -> put prof
+  _ -> put prof
   where
-    popView p = case NE.nonEmpty (NE.tail _views) of
+    popView p = case NE.nonEmpty (NE.tail $ _views p) of
       Nothing -> p
       Just xs -> p & views .~ xs
     moveUp p = p & currentFocus %~ (\i -> max 0 (i - 1))
@@ -272,10 +272,10 @@ currentCacheEntry p n = case p ^. topView of
   ModulesView {} -> ModulesCache n
 
 profileAttr :: AttrName
-profileAttr = "profile"
+profileAttr = attrName "profile"
 
 selectedAttr :: AttrName
-selectedAttr = "selected"
+selectedAttr = attrName "selected"
 
 drawProfile :: Profile -> [Widget Name]
 drawProfile prof =
